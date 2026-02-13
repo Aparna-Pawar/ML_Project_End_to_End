@@ -1,0 +1,13 @@
+prefix=/Users/aparna/Desktop/ML_Project_End_to_End/myvenv
+exec_prefix=/Users/aparna/Desktop/ML_Project_End_to_End/myvenv
+libdir=/Users/aparna/Desktop/ML_Project_End_to_End/myvenv/lib
+sharedlibdir=/Users/aparna/Desktop/ML_Project_End_to_End/myvenv/lib
+includedir=/Users/aparna/Desktop/ML_Project_End_to_End/myvenv/include
+
+Name: zlib
+Description: zlib compression library
+Version: 1.2.13
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}
