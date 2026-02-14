@@ -6,4 +6,5 @@ matplotlib
 seaborn
 plotly
 xgboost
--e .
+
+#-e .
