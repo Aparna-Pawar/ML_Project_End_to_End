@@ -6,5 +6,5 @@ matplotlib
 seaborn
 plotly
 xgboost
-
+dill
 #-e .
