@@ -4,8 +4,8 @@ import sys
 import numpy as np 
 import pandas as pd
 import dill
-from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
-
+from sklearn.metrics import recall_score, precision_score, f1_score, precision_recall_curve
+from sklearn.model_selection import RandomizedSearchCV
 from src.exception import CustomException
 from src.logger import logging
 
@@ -21,31 +21,63 @@ def save_object(file_path, obj):
     except Exception as e:
         raise CustomException(e, sys)
     
-def evaluate_models(xtrain,ytrain,xtest,ytest,models):
+def evaluate_models(X_train, y_train, X_test, y_test, models, param):
     try:
         report = {}
-        for i in range(len(models)):
+        for i in range(len(list(models))):
+            model_name = list(models.keys())[i]
             model = list(models.values())[i]
-            # Train model
-            model.fit(xtrain,ytrain)
+            para = param.get(model_name, {})
 
-            # Predict Training data
-            y_train_pred = model.predict(xtrain)
+            # --- Randomized Search CV ---
+            # n_iter=10 tries 10 random combinations; scoring='recall' focuses on fraud detection
+            rs = RandomizedSearchCV(
+                model, 
+                param_distributions=para, 
+                n_iter=10, 
+                cv=3, 
+                verbose=1, 
+                random_state=42, 
+                n_jobs=-1, 
+                scoring='recall'
+            )
+            rs.fit(X_train, y_train)
 
-            # Predict Testing data
-            y_test_pred =model.predict(xtest)
+            # Update model with best parameters found
+            model.set_params(**rs.best_params_)
+            model.fit(X_train, y_train)
 
-            # Get R2 scores for train and test data
-            train_model_score = r2_score(ytrain,y_train_pred)
-            test_model_score = r2_score(ytest,y_test_pred)
+            # --- Threshold Tuning Logic ---
+            # Get probabilities for the positive class (Fraud)
+            y_probs = model.predict_proba(X_test)[:, 1]
+            
+            # Calculate precision-recall curve
+            precisions, recalls, thresholds = precision_recall_curve(y_test, y_probs)
+            
+            # Find threshold that maximizes F1-score (balancing Recall and Precision)
+            # 1e-10 prevents division by zero
+            f1_scores = 2 * (precisions * recalls) / (precisions + recalls + 1e-10)
+            best_idx = np.argmax(f1_scores)
+            
+            # If no threshold found (rare), default to 0.5
+            best_threshold = thresholds[best_idx] if best_idx < len(thresholds) else 0.5
 
-            report[list(models.keys())[i]] =  test_model_score
+            # Apply the optimized threshold
+            y_pred_tuned = (y_probs >= best_threshold).astype(int)
+
+            # Store the comprehensive report
+            report[model_name] = {
+                "recall": recall_score(y_test, y_pred_tuned),
+                "precision": precision_score(y_test, y_pred_tuned, zero_division=0),
+                "f1": f1_score(y_test, y_pred_tuned),
+                "best_threshold": best_threshold,
+                "model_obj": model
+            }
 
         return report
 
     except Exception as e:
-        logging.info('Exception occured during model training')
-        raise CustomException(e,sys)
+        raise CustomException(e, sys)
     
 def model_metrics(true, predicted):
     try :
