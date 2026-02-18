@@ -27,6 +27,9 @@ class FeatureEngineeringTransformer(BaseEstimator, TransformerMixin):
     def transform(self, X):
         X = X.copy()
 
+        # We replace '?' with 'UNKNOWN' across the entire dataframe
+        X.replace('?', 'UNKNOWN', inplace=True)
+
         # Convert to datetime
         X['policy_bind_date'] = pd.to_datetime(X['policy_bind_date'])
         X['incident_date'] = pd.to_datetime(X['incident_date'])
