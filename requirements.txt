@@ -7,6 +7,9 @@ seaborn
 plotly
 xgboost
 catboost
+streamlit
+fastapi
+uvicorn
 dill
 
 #-e .
