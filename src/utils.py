@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import dill
 from sklearn.metrics import recall_score, precision_score, f1_score, precision_recall_curve
-from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
 from src.exception import CustomException
 from src.logger import logging
 
@@ -24,6 +24,9 @@ def save_object(file_path, obj):
 def evaluate_models(X_train, y_train, X_test, y_test, models, param):
     try:
         report = {}
+        
+        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
         for i in range(len(list(models))):
             model_name = list(models.keys())[i]
             model = list(models.values())[i]
@@ -34,8 +37,8 @@ def evaluate_models(X_train, y_train, X_test, y_test, models, param):
             rs = RandomizedSearchCV(
                 model, 
                 param_distributions=para, 
-                n_iter=10, 
-                cv=3, 
+                n_iter=15, 
+                cv=skf, 
                 verbose=1, 
                 random_state=42, 
                 n_jobs=-1, 
