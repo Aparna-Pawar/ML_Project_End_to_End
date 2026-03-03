@@ -11,4 +11,7 @@ streamlit
 fastapi
 uvicorn
 dill
--e .
+mlflow
+boto3
+
+#-e .
