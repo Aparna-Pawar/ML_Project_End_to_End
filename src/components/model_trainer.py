@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 from xgboost import XGBClassifier
 
 from src.exception import CustomException
@@ -110,6 +110,11 @@ class ModelTrainer:
             final_preds = (final_probs >= best_threshold).astype(int)
             
             logging.info(f"\nFinal Test Set Results ({best_model_name}):\n{classification_report(y_test, final_preds)}")
+
+            # 4. CREATE AND SAVE CONFUSION MATRIX
+            cm = confusion_matrix(y_test, final_preds)
+            logging.info(f"\nConfusion Matrix :\n{confusion_matrix(y_test, final_preds)}")
+
 
             return best_model_score
 

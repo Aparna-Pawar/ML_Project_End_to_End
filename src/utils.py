@@ -65,7 +65,6 @@ def evaluate_models(X_train, y_train, X_test, y_test, models, param):
             # If no threshold found (rare), default to 0.5
             best_threshold = thresholds[best_idx] if best_idx < len(thresholds) else 0.5
 
-
             # Apply the optimized threshold
             y_pred_tuned = (y_probs >= best_threshold).astype(int)
 
