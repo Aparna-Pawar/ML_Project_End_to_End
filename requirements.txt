@@ -11,5 +11,4 @@ streamlit
 fastapi
 uvicorn
 dill
-
-#-e .
+-e .
