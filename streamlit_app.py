@@ -100,3 +100,4 @@ if submit:
                 st.error(f"Error: {response.text}")
         except Exception as e:
             st.error(f"Connection Failed: {e}")
+            
